@@ -14,8 +14,31 @@ namespace szamlazo
 
         private Adatbazis()
         {
+            
         }
-
+        private void adatbazisinicializálás() 
+        {
+            DbCommand parancs = conn.CreateCommand();
+            parancs.CommandText = @"CREATE TABLE IF NOT EXISTS cegek (
+               id integer primary key, 
+               nev varchar(128) not null, 
+               cim varchar(256) not null,
+               bankszamla_szam varchar(256) not null
+);
+";
+            parancs.CommandText += @"CREATE TABLE IF NOT EXISTS szamlak (
+               id integer primary key, 
+               tipus integer not null,
+               teljesites_datuma date,
+               osszeg integer not null default 0,
+               letrehozas_datuma date default (datetime('now','localtime')),
+               ceg_id integer not null,
+               megjegyzes varchar(512),
+               foreign key (ceg_id) references cegek (id)
+);
+";
+            parancs.ExecuteNonQuery();
+        }
         private void initDb()
         {
             string dbPath = Path.GetFullPath(ConfigurationManager.AppSettings["dbFile"]);
@@ -40,6 +63,7 @@ namespace szamlazo
             {
                 instance = new Adatbazis();
                 instance.initDb();
+                instance.adatbazisinicializálás();
             }
             return instance;
         }
